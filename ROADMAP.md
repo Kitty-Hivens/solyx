@@ -72,7 +72,7 @@ Numerical foundation. Zero external dependencies.
 - [x] `Derivative` — numerical differentiation (central difference)
 - [x] `NewtonSolver` — root finding for single-variable functions
 - [x] `BrentSolver` — robust root finding, hybrid method
-- [ ] `GaussLegendre` — numerical integration
+- [x] `GaussLegendre` — numerical integration
 - [ ] `RK4Solver` — ODE solver, fixed step
 - [ ] `AdaptiveRK45` — ODE solver, adaptive step (Dormand-Prince)
 
