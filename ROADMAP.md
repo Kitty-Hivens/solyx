@@ -88,8 +88,8 @@ Thermodynamic models. Depends on `solyx-core`.
 - [x] `Vacancy` — explicit vacancy type for CEF
 
 ### Phase models
-- [ ] `GibbsModel` — base interface: `compute(state, temperature): JoulePerMole`
-- [ ] `IdealMixing` — ideal solution entropy: `-R * Σ(x_i * ln(x_i))`
+- [x] `GibbsModel` — base interface: `compute(state, temperature): JoulePerMole`
+- [x] `IdealMixing` — ideal solution entropy: `-R * Σ(x_i * ln(x_i))`
 - [ ] `RegularSolution` — ideal mixing + Redlich-Kister excess energy
 - [ ] `CEFModel` — Compound Energy Formalism, multi-sublattice
 - [ ] `IonicLiquid` — two-sublattice ionic liquid model
