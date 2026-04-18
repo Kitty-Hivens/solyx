@@ -73,8 +73,8 @@ Numerical foundation. Zero external dependencies.
 - [x] `NewtonSolver` — root finding for single-variable functions
 - [x] `BrentSolver` — robust root finding, hybrid method
 - [x] `GaussLegendre` — numerical integration
-- [ ] `RK4Solver` — ODE solver, fixed step
-- [ ] `AdaptiveRK45` — ODE solver, adaptive step (Dormand-Prince)
+- [x] `RK4Solver` — ODE solver, fixed step
+- [x] `AdaptiveRK45` — ODE solver, adaptive step (Dormand-Prince)
 
 ---
 
