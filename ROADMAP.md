@@ -70,8 +70,8 @@ Numerical foundation. Zero external dependencies.
 ### Numerical methods
 - [x] `KahanSum` — compensated summation, O(ε) error regardless of n
 - [x] `Derivative` — numerical differentiation (central difference)
-- [ ] `NewtonSolver` — root finding for single-variable functions
-- [ ] `BrentSolver` — robust root finding, hybrid method
+- [x] `NewtonSolver` — root finding for single-variable functions
+- [x] `BrentSolver` — robust root finding, hybrid method
 - [ ] `GaussLegendre` — numerical integration
 - [ ] `RK4Solver` — ODE solver, fixed step
 - [ ] `AdaptiveRK45` — ODE solver, adaptive step (Dormand-Prince)
