@@ -90,7 +90,7 @@ Thermodynamic models. Depends on `solyx-core`.
 ### Phase models
 - [x] `GibbsModel` — base interface: `compute(state, temperature): JoulePerMole`
 - [x] `IdealMixing` — ideal solution entropy: `-R * Σ(x_i * ln(x_i))`
-- [ ] `RegularSolution` — ideal mixing + Redlich-Kister excess energy
+- [x] `RegularSolution` — ideal mixing + Redlich-Kister excess energy
 - [ ] `CEFModel` — Compound Energy Formalism, multi-sublattice
 - [ ] `IonicLiquid` — two-sublattice ionic liquid model
 - [ ] `MagneticContribution` — Inden-Hillert-Jarl magnetic model
