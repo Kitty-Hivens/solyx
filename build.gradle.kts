@@ -10,7 +10,7 @@ subprojects {
     apply(plugin = "com.vanniktech.maven.publish")
 
     group   = "dev.hivens.solyx"
-    version = "0.1.0-SNAPSHOT"
+    version = "0.3.0-SNAPSHOT"
 
     extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
         jvmToolchain(25)
