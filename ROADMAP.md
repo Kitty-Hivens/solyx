@@ -96,8 +96,8 @@ Thermodynamic models. Depends on `solyx-core`.
 - [x] `MagneticContribution` — Inden-Hillert-Jarl magnetic model
 
 ### Chemical potential
-- [ ] `ChemicalPotential` — `∂G/∂n_i` for each component
-- [ ] `ActivityCoefficient` — derived from chemical potential
+- [x] `ChemicalPotential` — `∂G/∂n_i` for each component
+- [x] `ActivityCoefficient` — derived from chemical potential
 
 ---
 
