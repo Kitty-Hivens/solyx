@@ -68,8 +68,8 @@ Numerical foundation. Zero external dependencies.
 - [x] `Interval` — interval arithmetic, reliability check, conservative bounds
 
 ### Numerical methods
-- [ ] `KahanSum` — compensated summation, O(ε) error regardless of n
-- [ ] `Derivative` — numerical differentiation (central difference)
+- [x] `KahanSum` — compensated summation, O(ε) error regardless of n
+- [x] `Derivative` — numerical differentiation (central difference)
 - [ ] `NewtonSolver` — root finding for single-variable functions
 - [ ] `BrentSolver` — robust root finding, hybrid method
 - [ ] `GaussLegendre` — numerical integration
