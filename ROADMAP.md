@@ -83,9 +83,9 @@ Numerical foundation. Zero external dependencies.
 Thermodynamic models. Depends on `solyx-core`.
 
 ### Elements and species
-- [ ] `Element` — chemical element with atomic mass
-- [ ] `Species` — element or vacancy (Va) as sublattice occupant
-- [ ] `Vacancy` — explicit vacancy type for CEF
+- [x] `Element` — chemical element with atomic mass
+- [x] `Species` — element or vacancy (Va) as sublattice occupant
+- [x] `Vacancy` — explicit vacancy type for CEF
 
 ### Phase models
 - [ ] `GibbsModel` — base interface: `compute(state, temperature): JoulePerMole`
