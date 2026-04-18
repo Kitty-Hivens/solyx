@@ -92,7 +92,7 @@ Thermodynamic models. Depends on `solyx-core`.
 - [x] `IdealMixing` — ideal solution entropy: `-R * Σ(x_i * ln(x_i))`
 - [x] `RegularSolution` — ideal mixing + Redlich-Kister excess energy
 - [x] `CEFModel` — Compound Energy Formalism, multi-sublattice
-- [ ] `IonicLiquid` — two-sublattice ionic liquid model
+- [x] `IonicLiquid` — two-sublattice ionic liquid model
 - [ ] `MagneticContribution` — Inden-Hillert-Jarl magnetic model
 
 ### Chemical potential
