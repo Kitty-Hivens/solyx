@@ -112,6 +112,11 @@ object TdbExpressionParser {
 
         var i = 0
         while (i < cleaned.length) {
+            if (cleaned[i] !in "+-0123456789.TGHSERLNABCDEFIJKMOPQUVWXYZabcdefghijklmnopqrstuvwxyz") {
+                i++
+                continue
+            }
+
             // Determine sign
             var sign = 1.0
             when {
@@ -123,7 +128,7 @@ object TdbExpressionParser {
 
             // Check if starts with a letter — could be function ref
             if (cleaned[i].isLetter()) {
-                val match = FUNCTION_NAME.find(cleaned, i) ?: break
+                val match = FUNCTION_NAME.matchAt(cleaned, i) ?: break
                 val name = match.value
                 i += name.length
 
@@ -136,7 +141,7 @@ object TdbExpressionParser {
             }
 
             // Parse number
-            val numMatch = NUMBER.find(cleaned, i)
+            val numMatch = NUMBER.matchAt(cleaned, i)
             val coefficient = if (numMatch != null && numMatch.range.first == i) {
                 i += numMatch.value.length
                 numMatch.value.toDouble() * sign
@@ -155,7 +160,7 @@ object TdbExpressionParser {
 
                 // Check for function name after '*'
                 if (i < cleaned.length && cleaned[i].isLetter()) {
-                    val match = FUNCTION_NAME.find(cleaned, i) ?: break
+                    val match = FUNCTION_NAME.matchAt(cleaned, i) ?: break
                     val name = match.value
                     i += name.length
                     terms.add(TdbExpression.ScaledFunctionRef(coefficient, name))
@@ -193,7 +198,7 @@ object TdbExpressionParser {
                                 i = end + 1
                                 s
                             } else {
-                                val m = NUMBER.find(cleaned, i)!!
+                                val m = NUMBER.matchAt(cleaned, i)!!
                                 i += m.value.length
                                 m.value
                             }
