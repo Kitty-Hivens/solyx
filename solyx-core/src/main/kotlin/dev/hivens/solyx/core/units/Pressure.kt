@@ -19,7 +19,12 @@ value class Pressure(val value: Double) : Comparable<Pressure> {
     }
 
     operator fun plus(other: Pressure)  = Pressure(value + other.value)
-    operator fun minus(other: Pressure) = Pressure(value - other.value)
+    operator fun minus(other: Pressure): Pressure {
+        require(value >= other.value) {
+            "Pressure subtraction would yield negative pressure: $value - ${other.value} Pa"
+        }
+        return Pressure(value - other.value)
+    }
     operator fun times(factor: Double)  = Pressure(value * factor)
 
     override fun compareTo(other: Pressure) = value.compareTo(other.value)
@@ -57,9 +62,17 @@ value class MoleFraction(val value: Double) : Comparable<MoleFraction> {
         require(value in 0.0..1.0) { "Mole fraction must be in [0, 1]: $value" }
     }
 
-    operator fun plus(other: MoleFraction)  = MoleFraction(value + other.value)
-    operator fun minus(other: MoleFraction) = MoleFraction(value - other.value)
     operator fun times(factor: Double)      = MoleFraction(value * factor)
+
+    /**
+     * Arithmetic on raw values — returns Double, not MoleFraction.
+     *
+     * Adding or subtracting two mole fractions does not in general produce
+     * a valid mole fraction (e.g. 0.7 + 0.6 = 1.3). Returning Double makes
+     * this explicit and prevents silent invariant violations.
+     */
+    operator fun plus(other: MoleFraction)  = value + other.value
+    operator fun minus(other: MoleFraction) = value - other.value
 
     val complement get() = MoleFraction(1.0 - value)
 

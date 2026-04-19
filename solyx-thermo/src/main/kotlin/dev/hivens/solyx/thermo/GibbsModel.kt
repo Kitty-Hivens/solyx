@@ -20,7 +20,7 @@ data class SystemState(
     val temperature: Kelvin
 ) {
     init {
-        val sum = composition.values.sumOf { it.value }
+        val sum = kahanSumOf(composition.values) { it.value }
         require(sum in 0.9999..1.0001) {
             "Mole fractions must sum to 1.0, got $sum"
         }

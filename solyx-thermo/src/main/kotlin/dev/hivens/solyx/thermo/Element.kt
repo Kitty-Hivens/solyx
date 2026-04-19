@@ -82,7 +82,9 @@ sealed class Species {
         fun parse(symbol: String, known: Map<String, Element>): Species {
             if (symbol == "Va" || symbol == "VA" || symbol == "va") return Vacancy
             val element = known[symbol]
-                ?: error("Unknown element symbol: $symbol. Add it to the known elements map.")
+                ?: throw IllegalArgumentException(
+                    "Unknown element symbol: $symbol. Add it to the known elements map."
+                )
             return ElementSpecies(element)
         }
     }

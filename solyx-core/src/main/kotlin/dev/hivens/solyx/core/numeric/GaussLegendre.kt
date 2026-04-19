@@ -52,6 +52,10 @@ fun integrate(
  *
  * Runs integration twice — with [points] and with the next higher order —
  * and returns the difference as the uncertainty bound.
+ *
+ * When [points] is already [GaussPoints.N10] (the highest fixed order),
+ * falls back to [integrateAdaptive] for the fine estimate to avoid
+ * reporting a spurious zero error from comparing a method with itself.
  */
 fun integrateWithError(
     f: (Double) -> Double,
@@ -60,7 +64,11 @@ fun integrateWithError(
     points: GaussPoints = GaussPoints.N5
 ): Interval {
     val coarse = integrate(f, from, to, points)
-    val fine   = integrate(f, from, to, points.higher)
+    val fine = if (points == GaussPoints.N10) {
+        integrateAdaptive(f, from, to, tolerance = 1e-12)
+    } else {
+        integrate(f, from, to, points.higher)
+    }
     val error  = abs(fine - coarse)
     return Interval(fine, error / 2.0)
 }

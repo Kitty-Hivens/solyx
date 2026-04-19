@@ -54,9 +54,9 @@ data class IonicState(
     val temperature: Kelvin
 ) {
     init {
-        val cSum = cationOccupancy.values.sum()
+        val cSum = kahanSumOf(cationOccupancy.values) { it }
         require(cSum in 0.9999..1.0001) { "Cation fractions must sum to 1.0, got $cSum" }
-        val aSum = anionOccupancy.values.sum()
+        val aSum = kahanSumOf(anionOccupancy.values) { it }
         require(aSum in 0.9999..1.0001) { "Anion fractions must sum to 1.0, got $aSum" }
     }
 

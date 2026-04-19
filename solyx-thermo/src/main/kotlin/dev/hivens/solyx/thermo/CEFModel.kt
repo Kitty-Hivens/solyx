@@ -33,7 +33,7 @@ data class Sublattice(
 ) {
     init {
         require(stoichiometry > 0.0) { "Stoichiometry must be positive: $stoichiometry" }
-        val sum = occupancy.values.sum()
+        val sum = kahanSumOf(occupancy.values) { it }
         require(sum in 0.9999..1.0001) {
             "Site fractions must sum to 1.0, got $sum"
         }
