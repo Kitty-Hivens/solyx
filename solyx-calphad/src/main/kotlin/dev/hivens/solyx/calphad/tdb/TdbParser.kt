@@ -302,11 +302,15 @@ object TdbParser {
     // -------------------------------------------------------------------------
 
     /**
-     * Parses: "298.15 expr1; 1811 Y expr2; 6000 N"
+     * Parses: "298.15 expr1; 1357.77 Y expr2; 3200 N"
      * Into a list of TdbTemperatureRange.
      *
-     * The 'Y' means there is another range following.
-     * The 'N' means this is the last range.
+     * TDB layout after splitting by ';':
+     *   segment 0 : "tLow expr1"
+     *   segment 1 : "tHigh Y expr2"   <- upper bound, continuation flag, AND next expression
+     *   segment 2 : "tHigh N"          <- upper bound of last range (no expression)
+     *
+     * The 'Y' means another range follows; 'N' means last range.
      * Reference labels after 'N' (e.g. "N REF123") are ignored.
      */
     private fun parseTemperatureRanges(
@@ -316,34 +320,31 @@ object TdbParser {
         val ranges = mutableListOf<TdbTemperatureRange>()
         // Split on ';' — each segment is: tLow expression or tHigh Y/N
         val segments = input.split(";").map { it.trim() }.filter { it.isNotBlank() }
+        if (segments.isEmpty()) return ranges
 
+        // First segment: "tLow expr"
         var idx = 0
+        val firstParts = segments[idx].split("\\s+".toRegex(), limit = 2)
+        var tLow = firstParts[0].toDoubleOrNull() ?: return ranges
+        var exprStr = firstParts.getOrNull(1) ?: return ranges
+        idx++
+
         while (idx < segments.size) {
-            val segment = segments[idx]
-            val tokens = segment.trim().split("\\s+".toRegex(), limit = 2)
-
-            val tLow = tokens[0].toDoubleOrNull() ?: break
-            val expressionStr = tokens.getOrNull(1) ?: break
-
+            // Segment: "tHigh Y/N [nextExpr]"
+            // Split into at most 3 parts: tHigh, flag, rest-of-line (= expression for next range)
+            val boundParts = segments[idx].trim().split("\\s+".toRegex(), limit = 3)
+            val tHigh = boundParts[0].toDoubleOrNull() ?: break
+            val continuation = boundParts.getOrNull(1)?.uppercase()
             idx++
-            if (idx >= segments.size) break
 
-            // Next segment: "tHigh Y/N ..."
-            val nextTokens = segments[idx].trim().split("\\s+".toRegex(), limit = 3)
-            val tHigh = nextTokens[0].toDoubleOrNull() ?: break
-            val continuation = nextTokens.getOrNull(1)?.uppercase()
-
-            val expression = TdbExpressionParser.parse(expressionStr)
-                .withFunctions(functions)
-
+            val expression = TdbExpressionParser.parse(exprStr).withFunctions(functions)
             ranges.add(TdbTemperatureRange(tLow, tHigh, expression))
 
-            if (continuation == "N" || continuation == null) {
-                break  // Last range
-            }
+            if (continuation != "Y") break
 
-            // Y — there are more ranges, move to next segment
-            idx++
+            // Y: expression for the next range is the remainder of this same segment (boundParts[2])
+            tLow = tHigh
+            exprStr = boundParts.getOrNull(2) ?: break
         }
 
         return ranges

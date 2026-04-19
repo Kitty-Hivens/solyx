@@ -126,8 +126,15 @@ object TdbExpressionParser {
 
             if (i >= cleaned.length) break
 
-            // Check if starts with a letter — could be function ref
+            // Check if starts with a letter — could be function ref or standalone T
             if (cleaned[i].isLetter()) {
+                // Standalone 'T' (temperature variable) — not part of a longer name
+                if (cleaned[i] == 'T' && !cleaned.getOrElse(i + 1) { ' ' }.let { it.isLetterOrDigit() || it == '_' || it == '#' }) {
+                    i++ // consume 'T'
+                    // T alone without anything after it
+                    terms.add(TdbExpression.PowerTerm(sign, 1.0))
+                    continue
+                }
                 val match = FUNCTION_NAME.matchAt(cleaned, i) ?: break
                 val name = match.value
                 i += name.length
@@ -158,8 +165,14 @@ object TdbExpressionParser {
             if (cleaned[i] == '*') {
                 i++ // consume '*'
 
-                // Check for function name after '*'
-                if (i < cleaned.length && cleaned[i].isLetter()) {
+                // Standalone T (temperature variable) — must come before generic letter check
+                val nextIsT = i < cleaned.length && cleaned[i] == 'T' &&
+                        !cleaned.getOrElse(i + 1) { ' ' }.let { it.isLetterOrDigit() || it == '_' || it == '#' }
+
+                if (nextIsT) {
+                    i++ // consume 'T'
+                } else if (i < cleaned.length && cleaned[i].isLetter()) {
+                    // Check for function name after '*'
                     val match = FUNCTION_NAME.matchAt(cleaned, i) ?: break
                     val name = match.value
                     i += name.length
@@ -167,54 +180,55 @@ object TdbExpressionParser {
                     continue
                 }
 
-                // Must be T
-                if (i < cleaned.length && cleaned[i] == 'T') {
-                    i++ // consume 'T'
+                if (!nextIsT) {
+                    // nothing matched after '*', emit constant and move on
+                    terms.add(TdbExpression.Constant(coefficient))
+                    continue
+                }
 
-                    if (i >= cleaned.length || cleaned[i] == '+' || cleaned[i] == '-') {
-                        // coefficient * T
-                        terms.add(TdbExpression.PowerTerm(coefficient, 1.0))
+                if (i >= cleaned.length || cleaned[i] == '+' || cleaned[i] == '-') {
+                    // coefficient * T
+                    terms.add(TdbExpression.PowerTerm(coefficient, 1.0))
+                    continue
+                }
+
+                if (cleaned[i] == '*') {
+                    i++ // consume '*'
+
+                    // T*LN(T) or T**n
+                    if (i < cleaned.length && cleaned[i] == 'L') {
+                        // T*LN(T) or T*LOG(T)
+                        val isLog = cleaned.startsWith("LOG(T)", i)
+                        i += if (isLog) 6 else 5
+                        terms.add(TdbExpression.TLnT(coefficient))
                         continue
                     }
 
                     if (cleaned[i] == '*') {
-                        i++ // consume '*'
-
-                        // T*LN(T) or T**n
-                        if (i < cleaned.length && cleaned[i] == 'L') {
-                            // T*LN(T) or T*LOG(T)
-                            val isLog = cleaned.startsWith("LOG(T)", i)
-                            i += if (isLog) 6 else 5
-                            terms.add(TdbExpression.TLnT(coefficient))
-                            continue
+                        i++ // consume second '*' of '**'
+                        // Parse exponent — may be negative in parens: T**(-9)
+                        val expStr = if (cleaned[i] == '(') {
+                            val end = cleaned.indexOf(')', i)
+                            val s = cleaned.substring(i + 1, end)
+                            i = end + 1
+                            s
+                        } else {
+                            val m = NUMBER.matchAt(cleaned, i)!!
+                            i += m.value.length
+                            m.value
                         }
-
-                        if (cleaned[i] == '*') {
-                            i++ // consume second '*' of '**'
-                            // Parse exponent — may be negative in parens: T**(-9)
-                            val expStr = if (cleaned[i] == '(') {
-                                val end = cleaned.indexOf(')', i)
-                                val s = cleaned.substring(i + 1, end)
-                                i = end + 1
-                                s
-                            } else {
-                                val m = NUMBER.matchAt(cleaned, i)!!
-                                i += m.value.length
-                                m.value
-                            }
-                            terms.add(TdbExpression.PowerTerm(coefficient, expStr.toDouble()))
-                            continue
-                        }
+                        terms.add(TdbExpression.PowerTerm(coefficient, expStr.toDouble()))
+                        continue
                     }
-
-                    // Just T
-                    terms.add(TdbExpression.PowerTerm(coefficient, 1.0))
-                    continue
                 }
+
+                // Just T
+                terms.add(TdbExpression.PowerTerm(coefficient, 1.0))
+                continue
             }
 
             // Lone T
-            if (i < cleaned.length && cleaned[i] == 'T') {
+            if (cleaned[i] == 'T') {
                 i++
                 terms.add(TdbExpression.PowerTerm(coefficient, 1.0))
                 continue
