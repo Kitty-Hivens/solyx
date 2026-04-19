@@ -104,7 +104,7 @@ class TdbExpression(
 object TdbExpressionParser {
 
     private val FUNCTION_NAME = Regex("[A-Z][A-Z0-9_#]*")
-    private val NUMBER = Regex("[+-]?\\d+(?:\\.\\d+)?(?:[Ee][+-]?\\d+)?")
+    private val NUMBER = Regex("(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[Ee][+-]?\\d+)?")
 
     fun parse(input: String): TdbExpression {
         val terms = mutableListOf<TdbExpression.Term>()
@@ -222,6 +222,7 @@ object TdbExpressionParser {
 
             // Fallback — just a constant
             terms.add(TdbExpression.Constant(coefficient))
+            i++ // prevent infinite loop on unrecognized character
         }
 
         return TdbExpression(terms)
