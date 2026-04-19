@@ -145,10 +145,8 @@ data class Interval(val lo: Double, val hi: Double) {
          * val x = Interval(1200.0, tolerance = 1e-10)
          * ```
          */
-        operator fun invoke(value: Double, tolerance: Double): Interval {
-            require(tolerance >= 0.0) { "Tolerance must be non-negative: $tolerance" }
-            return Interval(value - tolerance, value + tolerance)
-        }
+        operator fun invoke(value: Double, tolerance: Double) =
+            Interval(value - tolerance, value + tolerance)
 
         /** Hull of a collection — smallest interval containing all values. */
         fun hull(values: Collection<Double>): Interval {
