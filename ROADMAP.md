@@ -106,8 +106,8 @@ Thermodynamic models. Depends on `solyx-core`.
 CALPHAD methodology. Depends on `solyx-thermo`.
 
 ### Database
-- [ ] `TdbParser` — parse Thermo-Calc `.tdb` files
-- [ ] `TdbDatabase` — in-memory representation of parsed TDB
+- [x] `TdbParser` — parse Thermo-Calc `.tdb` files
+- [x] `TdbDatabase` — in-memory representation of parsed TDB
 - [ ] `EndmemberParameter` — G° values per configuration
 - [ ] `InteractionParameter` — L^n Redlich-Kister parameters
 
