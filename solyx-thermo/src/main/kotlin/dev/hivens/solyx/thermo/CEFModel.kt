@@ -119,9 +119,16 @@ class CEFModel(
     /** G_ref = Σ (Π y_i^s) * G°(config) */
     private fun computeReference(sublattices: List<Sublattice>): Double =
         kahanSumOf(endmembers) { endmember ->
+            require(endmember.configuration.isNotEmpty()) {
+                "Endmember configuration must not be empty"
+            }
+            require(endmember.configuration.size <= sublattices.size) {
+                "Endmember configuration has ${endmember.configuration.size} sublattices " +
+                        "but model has only ${sublattices.size}"
+            }
             val product = endmember.configuration.mapIndexed { s, species ->
                 sublattices[s].y(species)
-            }.reduce(Double::times)
+            }.fold(1.0, Double::times)
             product * endmember.energy.value
         }
 
