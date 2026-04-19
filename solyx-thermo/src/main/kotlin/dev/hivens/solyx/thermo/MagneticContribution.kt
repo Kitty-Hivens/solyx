@@ -40,30 +40,50 @@ import kotlin.math.pow
  * val gMag = magneticBccFe.compute(Kelvin(800.0))
  * ```
  *
+ * For antiferromagnetic phases [beta] is stored as negative in CALPHAD databases.
+ * The effective moment is derived as `beta / afm`, where [afm] is the structure
+ * factor from TYPE_DEF (e.g. −3 for FCC, −1 for BCC). Both values are negative,
+ * so the result is positive and physically meaningful.
+ *
  * @param tc   Curie temperature (ferromagnetic) or Néel temperature (antiferromagnetic)
- * @param beta average magnetic moment per atom in Bohr magnetons
- * @param p    structure-dependent constant — 0.28 for BCC, 0.25 for FCC/HCP
+ * @param beta average magnetic moment per atom in Bohr magnetons;
+ *             negative value indicates antiferromagnetic ordering
+ * @param p    structure-dependent constant — 0.28 for BCC, 0.25 for FCC/HCP;
+ *             must be strictly in (0, 1) — value of 0 causes division by zero
+ * @param afm  antiferromagnetic scaling factor from TYPE_DEF MAGNETIC declaration;
+ *             negative integer (e.g. −3 for FCC, −1 for BCC); only used when [beta] < 0
  */
 class MagneticContribution(
     val tc: Kelvin,
     val beta: Double,
-    val p: Double
+    val p: Double,
+    val afm: Double = -1.0
 ) {
     init {
-        require(tc.value > 0.0)   { "Curie temperature must be positive: ${tc.value} K" }
-        require(p in 0.0..1.0)    { "Structure constant p must be in (0, 1): $p" }
+        require(tc.value > 0.0)     { "Curie temperature must be positive: ${tc.value} K" }
+        require(p > 0.0 && p < 1.0) { "Structure constant p must be strictly in (0, 1): $p" }
+        require(afm < 0.0)          { "AFM factor must be negative: $afm" }
     }
+
+    /**
+     * Effective magnetic moment used in the Hillert-Jarl formula.
+     *
+     * For ferromagnetic phases (beta > 0) this equals [beta] directly.
+     * For antiferromagnetic phases (beta < 0) it equals `beta / afm`,
+     * which is positive since both beta and afm are negative.
+     */
+    val betaEff: Double = if (beta < 0.0) beta / afm else beta
 
     /**
      * Compute magnetic Gibbs energy contribution at [temperature].
      *
-     * Returns zero if [beta] is zero — no magnetic moment means no contribution.
+     * Returns zero if [betaEff] is zero — no magnetic moment means no contribution.
      */
     fun compute(temperature: Kelvin): JoulePerMole {
-        if (beta == 0.0) return JoulePerMole(0.0)
+        if (betaEff == 0.0) return JoulePerMole(0.0)
 
         val tau = temperature.value / tc.value
-        val lnBeta1 = ln(beta.coerceAtLeast(0.0) + 1.0)
+        val lnBeta1 = ln(betaEff + 1.0)
         val f = if (tau < 1.0) fBelow(tau) else fAbove(tau)
 
         return JoulePerMole(R * temperature.value * lnBeta1 * f)
@@ -100,8 +120,8 @@ class MagneticContribution(
         /** BCC Fe (ferrite) — ferromagnetic below 1043 K. */
         val BCC_FE = MagneticContribution(tc = Kelvin(1043.0), beta = 2.22,  p = 0.28)
 
-        /** FCC Fe (austenite) — antiferromagnetic, negative beta. */
-        val FCC_FE = MagneticContribution(tc = Kelvin(201.0),  beta = -2.1,  p = 0.25)
+        /** FCC Fe (austenite) — antiferromagnetic; beta=-2.1, afm=-3 → betaEff=0.7. */
+        val FCC_FE = MagneticContribution(tc = Kelvin(201.0),  beta = -2.1,  p = 0.25, afm = -3.0)
 
         /** FCC Ni — ferromagnetic below 633 K. */
         val FCC_NI = MagneticContribution(tc = Kelvin(633.0),  beta = 0.52,  p = 0.25)

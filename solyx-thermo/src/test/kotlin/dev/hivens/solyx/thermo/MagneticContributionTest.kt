@@ -53,10 +53,14 @@ class MagneticContributionTest : DescribeSpec({
             gAbove.shouldBeWithinPercentageOf(gBelow, 10.0)
         }
 
-        it("FCC Fe antiferromagnetic — negative beta handled correctly") {
-            val g = MagneticContribution.FCC_FE.compute(Kelvin(300.0)).value
+        it("FCC Fe antiferromagnetic — betaEff is positive and contribution is non-zero") {
+            // beta=-2.1, afm=-3 -> betaEff = -2.1 / -3 = 0.7
+            MagneticContribution.FCC_FE.betaEff.shouldBeWithinPercentageOf(0.7, 0.01)
+            val g = MagneticContribution.FCC_FE.compute(Kelvin(100.0)).value
             g.isNaN()      shouldBe false
             g.isInfinite() shouldBe false
+            // Below Neel temp (201 K) the magnetic contribution must be non-zero
+            g shouldBeLessThan 0.0
         }
 
         it("all predefined models return finite values across temperature range") {
@@ -110,9 +114,21 @@ class MagneticContributionTest : DescribeSpec({
             }
         }
 
+        it("p = 0 — throws (would cause division by zero in formula)") {
+            shouldThrow<IllegalArgumentException> {
+                MagneticContribution(tc = Kelvin(1043.0), beta = 2.22, p = 0.0)
+            }
+        }
+
         it("p outside (0, 1) — throws") {
             shouldThrow<IllegalArgumentException> {
                 MagneticContribution(tc = Kelvin(1043.0), beta = 2.22, p = 1.5)
+            }
+        }
+
+        it("afm = 0 or positive — throws") {
+            shouldThrow<IllegalArgumentException> {
+                MagneticContribution(tc = Kelvin(1043.0), beta = -2.1, p = 0.25, afm = 3.0)
             }
         }
     }
