@@ -138,8 +138,8 @@ data class IonicEndmember(
  */
 class IonicLiquid(
     private val endmembers: List<IonicEndmember>,
-    private val cationInteractions: List<IonicInteraction> = emptyList(),
-    private val anionInteractions:  List<IonicInteraction> = emptyList()
+    private val cationInteractions: List<CationInteraction> = emptyList(),
+    private val anionInteractions:  List<AnionInteraction>  = emptyList()
 ) {
     /**
      * Compute molar Gibbs energy for the given ionic state.
@@ -177,8 +177,8 @@ class IonicLiquid(
     /** G_excess — Redlich-Kister on cation and anion sublattices independently. */
     private fun computeExcess(state: IonicState): Double {
         val cationExcess = kahanSumOf(cationInteractions) { interaction ->
-            val yA = state.cationOccupancy[interaction.a as IonicSpecies.Cation] ?: 0.0
-            val yB = state.cationOccupancy[interaction.b as IonicSpecies.Cation] ?: 0.0
+            val yA = state.cationOccupancy[interaction.a] ?: 0.0
+            val yB = state.cationOccupancy[interaction.b] ?: 0.0
             interaction.parameter.evaluate(yA, yB)
         }
         val anionExcess = kahanSumOf(anionInteractions) { interaction ->
@@ -191,10 +191,32 @@ class IonicLiquid(
 }
 
 /**
- * Redlich-Kister interaction between two ionic species on the same sublattice.
+ * Redlich-Kister interaction between two cations on the cation sublattice.
+ *
+ * Using a dedicated type instead of a generic `IonicInteraction(a: IonicSpecies, ...)`
+ * prevents ClassCastException at runtime — the compiler enforces that only
+ * cations can be passed here.
  */
-data class IonicInteraction(
-    val a: IonicSpecies,
-    val b: IonicSpecies,
+data class CationInteraction(
+    val a: IonicSpecies.Cation,
+    val b: IonicSpecies.Cation,
     val parameter: RedlichKisterParameter
 )
+
+/**
+ * Redlich-Kister interaction between two anion/vacancy species on the anion sublattice.
+ */
+data class AnionInteraction(
+    val a: IonicSpecies,   // Anion or Vacancy
+    val b: IonicSpecies,
+    val parameter: RedlichKisterParameter
+) {
+    init {
+        require(a is IonicSpecies.Anion || a is IonicSpecies.Vacancy) {
+            "AnionInteraction.a must be Anion or Vacancy, got: $a"
+        }
+        require(b is IonicSpecies.Anion || b is IonicSpecies.Vacancy) {
+            "AnionInteraction.b must be Anion or Vacancy, got: $b"
+        }
+    }
+}
