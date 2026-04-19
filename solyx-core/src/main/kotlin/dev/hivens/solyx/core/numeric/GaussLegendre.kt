@@ -69,8 +69,8 @@ fun integrateWithError(
     } else {
         integrate(f, from, to, points.higher)
     }
-    val error  = abs(fine - coarse)
-    return Interval(fine, error / 2.0)
+    val error = abs(fine - coarse)
+    return Interval.withTolerance(fine, error / 2.0)
 }
 
 /**

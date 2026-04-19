@@ -61,7 +61,7 @@ fun derivativeWithError(f: (Double) -> Double, x: Double): Interval {
     val coarse = (f(x + h2) - f(x - h2)) / (2.0 * h2)
     val error = abs(central - coarse) / 3.0
 
-    return Interval(central, error)
+    return Interval.withTolerance(central, error)
 }
 
 /**

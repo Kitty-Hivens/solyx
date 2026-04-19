@@ -1,9 +1,7 @@
 package dev.hivens.solyx.thermo
 
 import dev.hivens.solyx.core.error.Interval
-import dev.hivens.solyx.core.numeric.derivative
 import dev.hivens.solyx.core.units.JoulePerMole
-import dev.hivens.solyx.core.units.Kelvin
 import dev.hivens.solyx.core.units.MoleFraction
 import dev.hivens.solyx.core.units.PhysicalConstants.R
 import kotlin.math.exp
@@ -85,7 +83,7 @@ class ChemicalPotentialCalculator(private val model: GibbsModel) {
                     (state.composition[el]?.value ?: 0.0) * pd.first
                 }
                 val errorBound = partials.values.sumOf { it.second }
-                ChemicalPotential(element, JoulePerMole(mu), Interval(mu, errorBound))
+                ChemicalPotential(element, JoulePerMole(mu), Interval.withTolerance(mu, errorBound))
             } else {
                 val (dGdxi, err) = partials[element]!!
                 val xi = state.composition[element]?.value ?: 0.0
@@ -96,7 +94,7 @@ class ChemicalPotentialCalculator(private val model: GibbsModel) {
                     .sumOf { (el, pd) -> (state.composition[el]?.value ?: 0.0) * pd.first }
 
                 val mu = g + (1.0 - xi) * dGdxi - crossTerms
-                ChemicalPotential(element, JoulePerMole(mu), Interval(mu, err * (1.0 - xi)))
+                ChemicalPotential(element, JoulePerMole(mu), Interval.withTolerance(mu, err * (1.0 - xi)))
             }
         }
     }

@@ -141,12 +141,18 @@ data class Interval(val lo: Double, val hi: Double) {
         /**
          * Interval with explicit tolerance around a central value.
          *
+         * Use this factory instead of the primary constructor when you have
+         * a central estimate and an uncertainty radius:
          * ```kotlin
-         * val x = Interval(1200.0, tolerance = 1e-10)
+         * val x = Interval.withTolerance(1200.0, 1e-10)
          * ```
+         * Note: `Interval(value, tolerance)` would call the primary constructor
+         * (lo=value, hi=tolerance), which is almost certainly wrong.
          */
-        operator fun invoke(value: Double, tolerance: Double) =
-            Interval(value - tolerance, value + tolerance)
+        fun withTolerance(value: Double, tolerance: Double): Interval {
+            require(tolerance >= 0.0) { "Tolerance must be non-negative: $tolerance" }
+            return Interval(value - tolerance, value + tolerance)
+        }
 
         /** Hull of a collection — smallest interval containing all values. */
         fun hull(values: Collection<Double>): Interval {

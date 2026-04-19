@@ -73,7 +73,7 @@ fun newton(
             return SolverResult.Success(
                 root = x,
                 iterations = iteration,
-                residual = Interval(fx, tolerance)
+                residual = Interval.withTolerance(fx, tolerance)
             )
         }
 
@@ -134,8 +134,8 @@ fun brent(
         )
     }
 
-    if (abs(fa) < tolerance) return SolverResult.Success(a, 0, Interval(fa, tolerance))
-    if (abs(fb) < tolerance) return SolverResult.Success(b, 0, Interval(fb, tolerance))
+    if (abs(fa) < tolerance) return SolverResult.Success(a, 0, Interval.withTolerance(fa, tolerance))
+    if (abs(fb) < tolerance) return SolverResult.Success(b, 0, Interval.withTolerance(fb, tolerance))
 
     var lo = a; var hi = b
     var c = lo; var fc = fa
@@ -155,7 +155,7 @@ fun brent(
             return SolverResult.Success(
                 root = hi,
                 iterations = iteration,
-                residual = Interval(fb, tolerance)
+                residual = Interval.withTolerance(fb, tolerance)
             )
         }
 
