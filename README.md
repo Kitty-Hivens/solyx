@@ -3,7 +3,9 @@
 Computational thermodynamics library for the JVM.
 CALPHAD-based phase equilibrium calculations for materials science and engineering.
 
-> **Pre-release.** Core numerical methods and thermodynamic models are implemented.
+> **Pre-release. Currently on hold.** Core thermodynamic models and TDB parsing are implemented.
+> A Gibbs minimizer — required for actual phase equilibrium calculations — is not yet implemented.
+> The TDB parser is functional but not fully validated against the complete format spec.
 > Results are not yet verified against experimental data. Do not use in production.
 
 ---
